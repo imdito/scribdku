@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCRIBD↓ — Get Scribd Files</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="nav">
+  <a class="logo" href="#" data-nav="home">SCRIBD <span class="red">↓</span></a>
+  <button class="burger app-only" id="burger" aria-label="Menu" hidden>☰</button>
+  <nav class="nav-links app-only" id="navLinks" hidden>
+    <a href="#" data-nav="home">HOME</a>
+    <a href="#how" data-nav="home-how">HOW IT WORKS</a>
+    <a href="#" data-nav="history">HISTORY</a>
+    <a href="#" data-nav="users">USERS</a>
+    <a href="#how" data-nav="home-how">HELP</a>
+  </nav>
+  <div class="nav-session app-only" id="navSession" hidden>
+    <span class="nav-user" id="navUserName">@—</span>
+    <button type="button" class="btn btn-outline btn-signout" id="signOutBtn">SIGN OUT</button>
+  </div>
+</header>
+
+<!-- ============ LOGIN ============ -->
+<main id="view-login" class="view" hidden>
+  <section class="hero">
+    <p class="kicker"><span class="dot"></span> MEMBERS ONLY — SIGN IN</p>
+    <div class="hero-grid">
+      <h1 class="display display-md">SIGN<br><span class="outline">IN.</span></h1>
+      <p class="lead">Masuk untuk mengunduh dokumen dan mengelola user. Setiap user yang login bisa menambah user lain dari menu USERS.</p>
+    </div>
+    <form id="loginForm" class="url-bar" novalidate>
+      <input id="loginUsername" type="text" placeholder="USERNAME" autocomplete="username" autocapitalize="none" spellcheck="false">
+      <input id="loginPassword" type="password" placeholder="PASSWORD" autocomplete="current-password">
+      <button type="submit" class="btn btn-black btn-download">SIGN IN →</button>
+    </form>
+    <p id="loginError" class="inline-error" hidden>✕ USERNAME ATAU PASSWORD SALAH.</p>
+    <p class="note login-note">PASSWORD DISIMPAN SEBAGAI HASH • SESI DI COOKIE HTTPONLY</p>
+  </section>
+</main>
+
+<!-- ============ HOME ============ -->
+<main id="view-home" class="view" hidden>
+  <section class="hero">
+    <p class="kicker"><span class="dot"></span> PASTE LINK. GET FILE.</p>
+    <div class="hero-grid">
+      <h1 class="display">GET<br><span class="outline">SCRIBD</span><br>FILES<span class="red">.</span></h1>
+      <p class="lead">Tempel tautan dokumen Scribd, pilih format, dan simpan filenya. Tanpa drama, tanpa langkah berbelit — untuk dokumen yang memang berhak kamu akses.</p>
+    </div>
+
+    <form id="downloadForm" class="url-bar" novalidate>
+      <input id="urlInput" type="text" placeholder="Paste Scribd URL here — https://www.scribd.com/document/…" autocomplete="off" spellcheck="false">
+      <button type="submit" class="btn btn-black btn-download">DOWNLOAD ↓</button>
+    </form>
+    <p id="inlineError" class="inline-error" hidden>✕ TEMPEL TAUTAN SCRIBD DULU.</p>
+
+    <div class="format-row">
+      <div class="chips" id="formatChips" role="radiogroup" aria-label="Format file">
+        <button type="button" class="chip selected" data-format="PDF" role="radio" aria-checked="true">PDF</button>
+        <button type="button" class="chip" data-format="DOCX" role="radio" aria-checked="false">DOCX</button>
+        <button type="button" class="chip" data-format="TXT" role="radio" aria-checked="false">TXT</button>
+      </div>
+      <p class="note">FOR DOCUMENTS YOU HAVE THE RIGHT TO ACCESS • NO SIGN-UP</p>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <h2 class="section-title">HOW IT <span class="outline-sm">WORKS</span></h2>
+    <div class="steps">
+      <article class="card"><p class="index">01</p><h3>PASTE</h3><p class="lead-sm">Tempel tautan Scribd ke kolom di atas. Tautan publik atau dokumen milikmu sendiri.</p></article>
+      <article class="card"><p class="index">02</p><h3>CONVERT</h3><p class="lead-sm">Pilih PDF, DOCX, atau TXT. Sistem mengambil halaman dokumen dan menyusun filenya.</p></article>
+      <article class="card"><p class="index">03</p><h3>SAVE</h3><p class="lead-sm">Unduh dan simpan. Cek riwayat unduhan kapan saja dari menu HISTORY.</p></article>
+    </div>
+  </section>
+
+  <section class="ready" id="readySection" hidden>
+    <div class="ready-head"><h2>READY.</h2><p class="kicker red">YOUR FILE IS READY</p></div>
+    <div class="doc-card">
+      <div class="doc-info">
+        <h3 id="readyTitle">Scribd Document</h3>
+        <p class="meta" id="readyMeta">PDF • 0 PAGES • 0 KB</p>
+      </div>
+      <div class="doc-progress"><div class="track"><div class="fill" style="width:100%"></div></div><strong>100%</strong></div>
+      <a class="btn btn-red" id="getFileBtn" href="#">GET FILE ↓</a>
+    </div>
+    <p class="ready-note">FILE DIHAPUS DARI SERVER SETELAH 7 HARI — SIMPAN SALINANMU SENDIRI.</p>
+  </section>
+</main>
+
+<!-- ============ LOADING ============ -->
+<main id="view-loading" class="view" hidden>
+  <section class="hero">
+    <p class="kicker" id="loadingKicker"><span class="dot"></span> <span id="loadingPhaseText">STEP 02 OF 03 — CONVERTING</span></p>
+    <div class="hero-grid">
+      <h1 class="display display-md">WAIT.<br><span class="outline">CONVERTING</span></h1>
+      <div><p class="percent" id="percentText" aria-live="polite">0%</p><p class="meta" id="pagesText">MENGHITUNG HALAMAN…</p></div>
+    </div>
+    <p class="lead lead-wide" id="loadingLead">Sedang mengambil halaman dokumen dan menyusunnya jadi file. Jangan tutup halaman ini.</p>
+    <div class="track track-lg" id="progressTrack" role="progressbar" aria-label="Progres unduhan" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-labels"><span id="phaseLabel">MENYIAPKAN…</span><span id="etaText">MENGHUBUNGI SERVER…</span></div>
+    <div class="checklist">
+      <p class="done">✓ &nbsp;PASTE — link diterima</p>
+      <p class="doing" id="checkConvert">● &nbsp;CONVERT — sedang berjalan</p>
+      <p class="waiting" id="checkSave">○ &nbsp;SAVE — menunggu</p>
+    </div>
+    <button class="btn btn-outline btn-cancel" id="cancelBtn">CANCEL</button>
+  </section>
+</main>
+
+<!-- ============ ERROR ============ -->
+<main id="view-error" class="view" hidden>
+  <section class="hero">
+    <p class="kicker red" id="errorKicker"><span class="dot"></span> <span id="errorKickerText">ERROR — INVALID LINK</span></p>
+    <div class="hero-grid">
+      <h1 class="display display-md" id="errorHeadline"><span class="red">OOPS.</span><br>LINK<br><span class="outline">BROKEN.</span></h1>
+      <div>
+        <p class="lead error-lead" id="errorMessage">Tautan ini tidak valid, dokumennya privat / sudah dihapus, atau bukan tautan Scribd.</p>
+        <details class="error-details" id="errorDetails" hidden>
+          <summary>DETAIL TEKNIS</summary>
+          <pre id="errorDetail"></pre>
+        </details>
+      </div>
+    </div>
+    <div class="url-bar url-bar-error">
+      <input id="errorInput" type="text" readonly aria-label="URL yang gagal">
+      <span class="clear-x" id="clearError" role="button" tabindex="0" aria-label="Hapus link">✕</span>
+    </div>
+    <div class="error-actions">
+      <button class="btn btn-black" id="tryAgainBtn">TRY AGAIN ↓</button>
+      <button class="btn btn-outline" id="pasteNewBtn">PASTE NEW LINK</button>
+    </div>
+  </section>
+</main>
+
+<!-- ============ HISTORY ============ -->
+<main id="view-history" class="view" hidden>
+  <section class="hero">
+    <h1 class="display display-md">YOUR <span class="outline">HISTORY</span></h1>
+    <div class="history-head"><p class="meta" id="historyMeta">0 FILES • TOTAL 0 MB</p><button class="clear-all" id="clearAllBtn">CLEAR ALL ✕</button></div>
+    <div id="historyList"></div>
+    <p class="empty" id="historyEmpty">Belum ada unduhan. Tempel tautan pertamamu di HOME.</p>
+    <p class="note history-note">FILE DIHAPUS DARI SERVER SETELAH 7 HARI — SIMPAN SALINANMU SENDIRI.</p>
+  </section>
+</main>
+
+<!-- ============ USERS ============ -->
+<main id="view-users" class="view" hidden>
+  <section class="hero">
+    <p class="kicker"><span class="dot"></span> MANAGE ACCESS</p>
+    <div class="hero-grid">
+      <h1 class="display display-md">USERS<span class="red">.</span></h1>
+      <p class="lead">Setiap user yang login bisa menambah user baru. Password disimpan sebagai hash dan tidak bisa dilihat lagi.</p>
+    </div>
+    <form id="addUserForm" class="url-bar" novalidate>
+      <input id="newUsername" type="text" placeholder="USERNAME BARU — 3–32 KARAKTER" autocomplete="off" autocapitalize="none" spellcheck="false">
+      <input id="newPassword" type="password" placeholder="PASSWORD — MIN. 6 KARAKTER" autocomplete="new-password">
+      <button type="submit" class="btn btn-black btn-download">ADD USER +</button>
+    </form>
+    <p id="userFormMessage" class="inline-error" hidden></p>
+    <div class="history-head"><p class="meta" id="usersMeta">0 USERS</p><p class="note">SEMUA USER PUNYA HAK YANG SAMA</p></div>
+    <div id="usersList"></div>
+  </section>
+</main>
+
+<footer class="footer"><span>SCRIBD↓ — PDF • DOCX • TXT</span><span>EXAGGERATED MINIMALISM</span></footer>
+<script src="app.js"></script>
+</body>
+</html>

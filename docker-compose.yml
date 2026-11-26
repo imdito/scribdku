@@ -1,0 +1,30 @@
+name: scribd-downloader
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: scribd-downloader:local
+    container_name: scribd-downloader
+    ports:
+      - "${SCRIBD_PORT:-8080}:8000"
+    environment:
+      SCRIBD_MAX_CONCURRENT: "1"
+      SCRIBD_JOB_TTL_DAYS: "7"
+      SCRIBD_EXPORT_BATCH_SIZE: "8"
+      SCRIBD_CDP_TIMEOUT: "600"
+      SCRIBD_PAGE_LOAD_TIMEOUT: "120"
+      SCRIBD_JOB_TIMEOUT: "3600"
+      SCRIBD_DEFAULT_USERNAME: "${SCRIBD_DEFAULT_USERNAME:-ditok}"
+      SCRIBD_DEFAULT_PASSWORD: "${SCRIBD_DEFAULT_PASSWORD:-tokditok}"
+      SCRIBD_SESSION_DAYS: "${SCRIBD_SESSION_DAYS:-7}"
+      SCRIBD_COOKIE_SECURE: "${SCRIBD_COOKIE_SECURE:-0}"
+    volumes:
+      - scribd-data:/data
+    shm_size: "1gb"
+    restart: unless-stopped
+    stop_grace_period: 30s
+
+volumes:
+  scribd-data:

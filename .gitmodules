@@ -1,0 +1,3 @@
+[submodule "scribd-downloader"]
+	path = scribd-downloader
+	url = https://github.com/themrsami/scribd-downloader.git
