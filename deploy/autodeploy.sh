@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Poll origin/main; deploy only when it moved. Called by systemd timer.
 set -uo pipefail
+export GIT_TERMINAL_PROMPT=0
 cd "$HOME/scribdku" || exit 0
 git fetch -q origin main || exit 0
 LOCAL=$(git rev-parse HEAD); REMOTE=$(git rev-parse origin/main)
