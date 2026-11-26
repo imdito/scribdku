@@ -11,37 +11,15 @@
 <body>
 <header class="nav">
   <a class="logo" href="#" data-nav="home">SCRIBD <span class="red">↓</span></a>
-  <button class="burger app-only" id="burger" aria-label="Menu" hidden>☰</button>
-  <nav class="nav-links app-only" id="navLinks" hidden>
+  <button class="burger" id="burger" aria-label="Menu">☰</button>
+  <nav class="nav-links" id="navLinks">
     <a href="#" data-nav="home">HOME</a>
     <a href="#how" data-nav="home-how">HOW IT WORKS</a>
     <a href="#" data-nav="history">HISTORY</a>
-    <a href="#" data-nav="users">USERS</a>
     <a href="#how" data-nav="home-how">HELP</a>
   </nav>
-  <div class="nav-session app-only" id="navSession" hidden>
-    <span class="nav-user" id="navUserName">@—</span>
-    <button type="button" class="btn btn-outline btn-signout" id="signOutBtn">SIGN OUT</button>
-  </div>
 </header>
 
-<!-- ============ LOGIN ============ -->
-<main id="view-login" class="view" hidden>
-  <section class="hero">
-    <p class="kicker"><span class="dot"></span> MEMBERS ONLY — SIGN IN</p>
-    <div class="hero-grid">
-      <h1 class="display display-md">SIGN<br><span class="outline">IN.</span></h1>
-      <p class="lead">Masuk untuk mengunduh dokumen dan mengelola user. Setiap user yang login bisa menambah user lain dari menu USERS.</p>
-    </div>
-    <form id="loginForm" class="url-bar" novalidate>
-      <input id="loginUsername" type="text" placeholder="USERNAME" autocomplete="username" autocapitalize="none" spellcheck="false">
-      <input id="loginPassword" type="password" placeholder="PASSWORD" autocomplete="current-password">
-      <button type="submit" class="btn btn-black btn-download">SIGN IN →</button>
-    </form>
-    <p id="loginError" class="inline-error" hidden>✕ USERNAME ATAU PASSWORD SALAH.</p>
-    <p class="note login-note">PASSWORD DISIMPAN SEBAGAI HASH • SESI DI COOKIE HTTPONLY</p>
-  </section>
-</main>
 
 <!-- ============ HOME ============ -->
 <main id="view-home" class="view" hidden>
@@ -147,24 +125,6 @@
   </section>
 </main>
 
-<!-- ============ USERS ============ -->
-<main id="view-users" class="view" hidden>
-  <section class="hero">
-    <p class="kicker"><span class="dot"></span> MANAGE ACCESS</p>
-    <div class="hero-grid">
-      <h1 class="display display-md">USERS<span class="red">.</span></h1>
-      <p class="lead">Setiap user yang login bisa menambah user baru. Password disimpan sebagai hash dan tidak bisa dilihat lagi.</p>
-    </div>
-    <form id="addUserForm" class="url-bar" novalidate>
-      <input id="newUsername" type="text" placeholder="USERNAME BARU — 3–32 KARAKTER" autocomplete="off" autocapitalize="none" spellcheck="false">
-      <input id="newPassword" type="password" placeholder="PASSWORD — MIN. 6 KARAKTER" autocomplete="new-password">
-      <button type="submit" class="btn btn-black btn-download">ADD USER +</button>
-    </form>
-    <p id="userFormMessage" class="inline-error" hidden></p>
-    <div class="history-head"><p class="meta" id="usersMeta">0 USERS</p><p class="note">SEMUA USER PUNYA HAK YANG SAMA</p></div>
-    <div id="usersList"></div>
-  </section>
-</main>
 
 <footer class="footer"><span>SCRIBD↓ — PDF • DOCX • TXT</span><span>EXAGGERATED MINIMALISM</span></footer>
 <script src="app.js"></script>

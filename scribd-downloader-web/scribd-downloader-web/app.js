@@ -3,12 +3,10 @@ const API = (window.SCRIBD_API_BASE || '').replace(/\/$/, '');
 const $ = (selector) => document.querySelector(selector);
 
 const views = {
-  login: $('#view-login'),
   home: $('#view-home'),
   loading: $('#view-loading'),
   error: $('#view-error'),
   history: $('#view-history'),
-  users: $('#view-users'),
 };
 
 const FORMAT_LABELS = { pdf: 'PDF', docx: 'DOCX', txt: 'TXT' };
@@ -64,7 +62,6 @@ const state = {
   pollTimer: null,
   pollFailures: 0,
   currentUrl: '',
-  username: null,
 };
 
 function show(name) {
@@ -74,32 +71,9 @@ function show(name) {
   window.scrollTo({ top: 0 });
 }
 
-function setAuthenticated(username) {
-  state.username = username;
-  $('#navUserName').textContent = `@${username}`;
-  $('#readySection').hidden = true;
-  document.querySelectorAll('.app-only').forEach((element) => {
-    element.hidden = false;
-  });
-  show('home');
-}
-
-function setSignedOut() {
-  stopPolling();
-  state.username = null;
-  document.querySelectorAll('.app-only').forEach((element) => {
-    element.hidden = true;
-  });
-  $('#navLinks').classList.remove('open');
-  $('#readySection').hidden = true;
-  $('#loginPassword').value = '';
-  $('#loginError').hidden = true;
-  show('login');
-  $('#loginUsername').focus();
-}
 
 async function api(path, options = {}) {
-  const { skipAuthRedirect = false, ...fetchOptions } = options;
+  const fetchOptions = options;
   let response;
   try {
     response = await fetch(`${API}${path}`, { cache: 'no-store', ...fetchOptions });
@@ -123,9 +97,6 @@ async function api(path, options = {}) {
     );
     error.code = (payload && payload.code) || 'http_error';
     error.status = response.status;
-    if (response.status === 401 && !skipAuthRedirect) {
-      setSignedOut();
-    }
     throw error;
   }
   return payload;
@@ -165,19 +136,10 @@ document.querySelectorAll('[data-nav]').forEach((link) => {
   link.addEventListener('click', (event) => {
     event.preventDefault();
     $('#navLinks').classList.remove('open');
-    if (!state.username) {
-      show('login');
-      return;
-    }
     const target = link.dataset.nav;
     if (target === 'history') {
       show('history');
       renderHistory();
-      return;
-    }
-    if (target === 'users') {
-      show('users');
-      renderUsers();
       return;
     }
     show('home');
@@ -246,7 +208,6 @@ async function submitJob(url, format) {
     renderLoading(job);
     schedulePoll(500);
   } catch (error) {
-    if (error.status === 401) return;
     const message =
       error.code === 'network'
         ? 'Tidak bisa menghubungi server. Pastikan layanan sedang berjalan.'
@@ -518,7 +479,6 @@ $('#cancelBtn').addEventListener('click', async () => {
     await api(`/api/jobs/${encodeURIComponent(jobId)}/cancel`, { method: 'POST' });
   } catch (error) {
     // The job may have finished between the click and the request.
-    if (error.status === 401) return;
   }
   stopPolling();
   show('home');
@@ -608,7 +568,6 @@ async function renderHistory() {
   try {
     jobs = await api('/api/jobs');
   } catch (error) {
-    if (error.status === 401) return;
     list.replaceChildren();
     empty.hidden = false;
     empty.textContent = 'Gagal memuat riwayat dari server. Coba lagi nanti.';
@@ -636,150 +595,11 @@ $('#clearAllBtn').addEventListener('click', async () => {
     await api('/api/jobs', { method: 'DELETE' });
     await renderHistory();
   } catch (error) {
-    if (error.status === 401) return;
     window.alert(error.message);
   } finally {
     button.disabled = false;
   }
 });
 
-// ------------------------------------------------------------------------ auth
-$('#loginForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const username = $('#loginUsername').value.trim();
-  const password = $('#loginPassword').value;
-  const errorElement = $('#loginError');
-  errorElement.hidden = true;
-
-  if (!username || !password) {
-    errorElement.textContent = '✕ USERNAME DAN PASSWORD WAJIB DIISI.';
-    errorElement.hidden = false;
-    return;
-  }
-
-  const button = $('#loginForm .btn-download');
-  button.disabled = true;
-  button.textContent = 'SIGNING IN…';
-  try {
-    const me = await api('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-      skipAuthRedirect: true,
-    });
-    $('#loginPassword').value = '';
-    setAuthenticated(me.username);
-  } catch (error) {
-    errorElement.textContent = `✕ ${error.message}`;
-    errorElement.hidden = false;
-    $('#loginPassword').select();
-  } finally {
-    button.disabled = false;
-    button.textContent = 'SIGN IN →';
-  }
-});
-
-$('#signOutBtn').addEventListener('click', async () => {
-  try {
-    await api('/api/auth/logout', { method: 'POST', skipAuthRedirect: true });
-  } catch (error) {
-    // Sign out locally even when the request cannot reach the server.
-  }
-  setSignedOut();
-});
-
-function setUserMessage(text, ok = false) {
-  const element = $('#userFormMessage');
-  element.textContent = text || '';
-  element.hidden = !text;
-  element.classList.toggle('inline-error', !ok);
-  element.classList.toggle('inline-ok', ok);
-}
-
-function userRow(user, index) {
-  const row = document.createElement('div');
-  row.className = 'user-row';
-
-  const number = document.createElement('p');
-  number.className = 'index';
-  number.textContent = String(index + 1).padStart(2, '0');
-
-  const info = document.createElement('div');
-  const title = document.createElement('h3');
-  title.textContent = user.username;
-  const meta = document.createElement('p');
-  meta.className = 'meta';
-  meta.textContent = `DIBUAT ${formatDate(user.created_at)} • OLEH ${String(
-    user.created_by || '—'
-  ).toUpperCase()}`;
-  info.append(title, meta);
-
-  const status = document.createElement('span');
-  status.className = 'status';
-  status.textContent = 'ACTIVE';
-
-  row.append(number, info, status);
-  return row;
-}
-
-async function renderUsers() {
-  const list = $('#usersList');
-  const meta = $('#usersMeta');
-  meta.textContent = 'MEMUAT USERS…';
-
-  let users;
-  try {
-    users = await api('/api/auth/users');
-  } catch (error) {
-    if (error.status === 401) return;
-    list.replaceChildren();
-    meta.textContent = 'GAGAL MEMUAT USERS';
-    setUserMessage(`✕ ${error.message}`);
-    return;
-  }
-
-  list.replaceChildren();
-  users.forEach((user, index) => list.appendChild(userRow(user, index)));
-  meta.textContent = `${users.length} USER${users.length === 1 ? '' : 'S'}`;
-}
-
-$('#addUserForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const username = $('#newUsername').value.trim();
-  const password = $('#newPassword').value;
-  setUserMessage('');
-
-  if (!username || !password) {
-    setUserMessage('✕ USERNAME DAN PASSWORD WAJIB DIISI.');
-    return;
-  }
-
-  const button = $('#addUserForm .btn-download');
-  button.disabled = true;
-  button.textContent = 'ADDING…';
-  try {
-    const user = await api('/api/auth/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    $('#addUserForm').reset();
-    setUserMessage(`✓ USER "${user.username}" DITAMBAHKAN.`, true);
-    await renderUsers();
-  } catch (error) {
-    if (error.status === 401) return;
-    setUserMessage(`✕ ${error.message}`);
-  } finally {
-    button.disabled = false;
-    button.textContent = 'ADD USER +';
-  }
-});
-
-(async function bootstrapAuth() {
-  try {
-    const me = await api('/api/auth/me', { skipAuthRedirect: true });
-    setAuthenticated(me.username);
-  } catch (error) {
-    setSignedOut();
-  }
-})();
+// ---------------------------------------------------------------------- init
+show('home');

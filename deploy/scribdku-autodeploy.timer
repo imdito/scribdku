@@ -1,7 +1,0 @@
-[Unit]
-Description=Poll GitHub main for scribdku
-[Timer]
-OnBootSec=2min
-OnUnitActiveSec=5min
-[Install]
-WantedBy=timers.target

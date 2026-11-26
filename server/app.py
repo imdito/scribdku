@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 import backend_bridge
-from auth import AuthError, AuthManager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
@@ -43,15 +41,6 @@ WEB_DIR = Path(
 ).expanduser().resolve()
 
 manager = JobManager.from_env()
-auth = AuthManager.from_env()
-
-PUBLIC_API_PATHS = {
-    "/api/health",
-    "/api/auth/login",
-    "/api/auth/me",
-    "/api/auth/logout",
-    "/api/openapi.json",
-}
 
 
 def _error(status_code: int, code: str, message: str) -> JSONResponse:
@@ -63,7 +52,6 @@ def _error(status_code: int, code: str, message: str) -> JSONResponse:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    auth.initialize()
     await manager.start()
     headless_mode = os.getenv("SCRIBD_HEADLESS", "1").strip().lower() not in {
         "0",
@@ -93,25 +81,8 @@ app = FastAPI(
 
 
 @app.middleware("http")
-async def api_guard(request: Request, call_next):
-    """Require a valid session for every API route except health and auth."""
-    path = request.url.path
-    protected = (
-        path.startswith("/api/")
-        and path not in PUBLIC_API_PATHS
-        and not path.startswith("/api/docs")
-    )
-
-    if protected:
-        username = auth.session_username(request.cookies.get(auth.cookie_name))
-        if not username:
-            response = _error(401, "unauthorized", "Silakan login terlebih dahulu.")
-        else:
-            request.state.username = username
-            response = await call_next(request)
-    else:
-        response = await call_next(request)
-
+async def security_headers(request: Request, call_next):
+    response = await call_next(request)
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     return response
 
@@ -124,80 +95,6 @@ async def handle_validation_error(_: Request, __: RequestValidationError) -> JSO
 class CreateJobPayload(BaseModel):
     url: str = ""
     format: str = "pdf"
-
-
-class LoginPayload(BaseModel):
-    username: str = ""
-    password: str = ""
-
-
-class CreateUserPayload(BaseModel):
-    username: str = ""
-    password: str = ""
-
-
-@app.post("/api/auth/login")
-async def login(payload: LoginPayload, request: Request):
-    client_ip = request.client.host if request.client else "unknown"
-    username = (payload.username or "").strip()
-    throttle_key = auth.throttle_key(client_ip, username)
-
-    retry_after = auth.retry_after(throttle_key)
-    if retry_after:
-        return _error(
-            429,
-            "too_many_attempts",
-            f"Terlalu banyak percobaan. Coba lagi dalam {retry_after} detik.",
-        )
-
-    verified = await asyncio.to_thread(
-        auth.verify_credentials, username, payload.password
-    )
-    if not verified:
-        auth.record_failure(throttle_key)
-        logger.warning("failed login for %r from %s", username, client_ip)
-        return _error(401, "invalid_credentials", "Username atau password salah.")
-
-    auth.clear_failures(throttle_key)
-    token = auth.create_session(verified)
-    response = JSONResponse({"username": verified})
-    auth.set_session_cookie(response, token)
-    logger.info("login ok for %s from %s", verified, client_ip)
-    return response
-
-
-@app.get("/api/auth/me")
-async def current_user(request: Request):
-    username = auth.session_username(request.cookies.get(auth.cookie_name))
-    if not username:
-        return _error(401, "unauthorized", "Silakan login terlebih dahulu.")
-    return auth.get_public_user(username) or {"username": username}
-
-
-@app.post("/api/auth/logout")
-async def logout():
-    response = JSONResponse({"ok": True})
-    auth.clear_session_cookie(response)
-    return response
-
-
-@app.get("/api/auth/users")
-async def list_users() -> list[dict]:
-    return auth.list_users()
-
-
-@app.post("/api/auth/users", status_code=201)
-async def create_user(payload: CreateUserPayload, request: Request):
-    try:
-        user = await asyncio.to_thread(
-            auth.create_user,
-            payload.username,
-            payload.password,
-            getattr(request.state, "username", "unknown"),
-        )
-    except AuthError as error:
-        return _error(error.status_code, error.code, error.message)
-    return JSONResponse(status_code=201, content=user)
 
 
 @app.get("/api/health")
@@ -300,7 +197,6 @@ else:
 __all__ = [
     "app",
     "manager",
-    "auth",
     "BackendUnavailableError",
     "InvalidFormatError",
     "InvalidURLError",
