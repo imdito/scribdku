@@ -20,6 +20,9 @@ services:
       SCRIBD_DEFAULT_PASSWORD: "${SCRIBD_DEFAULT_PASSWORD:-tokditok}"
       SCRIBD_SESSION_DAYS: "${SCRIBD_SESSION_DAYS:-7}"
       SCRIBD_COOKIE_SECURE: "${SCRIBD_COOKIE_SECURE:-0}"
+      SCRIBD_HEADLESS: "${SCRIBD_HEADLESS:-1}"
+      SCRIBD_PROXY: "${SCRIBD_PROXY:-}"
+      SCRIBD_PROXY_BYPASS: "${SCRIBD_PROXY_BYPASS:-localhost;127.0.0.1}"
     volumes:
       - scribd-data:/data
     shm_size: "1gb"

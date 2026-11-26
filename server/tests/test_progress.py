@@ -158,6 +158,18 @@ def test_classify_cloudflare():
     assert "Cloudflare" in message
 
 
+def test_classify_client_challenge_as_blocked():
+    code, message = classify_error(
+        "No printable document pages were detected.\n"
+        "  Reason: The Scribd viewer did not load any pages.\n"
+        "  Page title: 'Client Challenge'\n"
+        "  Page URL: https://www.scribd.com/embeds/630915458/content"
+    )
+    assert code == "blocked"
+    assert "proxy residensial" in message
+    assert "Client Challenge" in message
+
+
 def test_classify_not_found():
     code, message = classify_error(
         "The document was not found. It may have been deleted or made private."
@@ -182,6 +194,11 @@ def test_classify_browser_error():
     assert classify_error(
         "selenium.common.exceptions.SessionNotCreatedException: session not created"
     )[0] == "browser_error"
+
+
+def test_classify_proxy_errors():
+    assert classify_error("net::ERR_PROXY_AUTH_UNSUPPORTED")[0] == "proxy_auth"
+    assert classify_error("net::ERR_TUNNEL_CONNECTION_FAILED")[0] == "proxy_error"
 
 
 def test_classify_fallback():

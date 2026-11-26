@@ -65,6 +65,16 @@ def _error(status_code: int, code: str, message: str) -> JSONResponse:
 async def lifespan(_: FastAPI):
     auth.initialize()
     await manager.start()
+    headless_mode = os.getenv("SCRIBD_HEADLESS", "1").strip().lower() not in {
+        "0",
+        "false",
+        "no",
+    }
+    logger.info(
+        "browser mode: %s; proxy: %s",
+        "headless" if headless_mode else "headful (Xvfb)",
+        "configured" if os.getenv("SCRIBD_PROXY", "").strip() else "none",
+    )
     logger.info("Scribd downloader API %s listening (web dir: %s)", VERSION, WEB_DIR)
     try:
         yield

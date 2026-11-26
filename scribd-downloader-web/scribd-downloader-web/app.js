@@ -38,6 +38,8 @@ const ERROR_KICKERS = {
   login_required: 'ERROR — DOCUMENT LOCKED',
   bad_password: 'ERROR — DOCUMENT LOCKED',
   timeout: 'ERROR — TIMEOUT',
+  proxy_auth: 'ERROR — PROXY AUTH',
+  proxy_error: 'ERROR — PROXY OFFLINE',
   browser_error: 'ERROR — SERVER PROBLEM',
   backend_unavailable: 'ERROR — SERVER PROBLEM',
   internal: 'ERROR — SERVER PROBLEM',

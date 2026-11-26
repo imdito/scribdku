@@ -21,6 +21,7 @@ RUN apt-get update \
         fonts-dejavu-core \
         fonts-liberation2 \
         tini \
+        xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -33,6 +34,7 @@ COPY server /app/server
 COPY scribd-downloader-web/scribd-downloader-web /app/web
 
 RUN useradd --create-home --home-dir /home/app --uid 10001 app \
+    && chmod +x /app/server/docker-entrypoint.sh \
     && mkdir -p /data/jobs /data/tmp \
     && chown -R app:app /data /app
 
@@ -43,5 +45,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=6s --start-period=20s --retries=3 \
     CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4)"]
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/server/docker-entrypoint.sh"]
 CMD ["uvicorn", "app:app", "--app-dir", "/app/server", "--host", "0.0.0.0", "--port", "8000"]

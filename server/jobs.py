@@ -221,7 +221,7 @@ def apply_progress(job: dict, update: dict) -> bool:
 
     if kind == "browser":
         job["phase"] = "browser"
-        job["message"] = "Menjalankan browser headless…"
+        job["message"] = "Menjalankan browser…"
         job["progress"] = max(progress, 3.0)
         return True
 
@@ -251,6 +251,22 @@ def classify_error(message: str, *, stderr: str = "", stdout_tail: str = "") -> 
 
     if "invalid scribd url" in text or "not a valid scribd" in text:
         return "invalid_url", "Tautan bukan link dokumen Scribd yang valid."
+    if any(
+        marker in text
+        for marker in (
+            "client challenge",
+            "datadome",
+            "captcha-delivery",
+            "dd_cookie",
+            "challenge-platform",
+        )
+    ):
+        return (
+            "blocked",
+            "Scribd menampilkan tantangan bot (Client Challenge/DataDome). IP server ini "
+            "diblokir — gunakan proxy residensial (SCRIBD_PROXY) atau jalankan dari "
+            "jaringan rumahan.",
+        )
     if any(
         marker in text
         for marker in (
@@ -302,6 +318,26 @@ def classify_error(message: str, *, stderr: str = "", stdout_tail: str = "") -> 
         )
     if "timed out" in text or "timeout" in text:
         return "timeout", "Proses melebihi batas waktu. Coba lagi atau gunakan dokumen lain."
+    if "err_proxy_auth" in text or "proxy authentication" in text:
+        return (
+            "proxy_auth",
+            "Proxy meminta autentikasi. Periksa SCIBD_PROXY atau gunakan proxy "
+            "HTTP dengan username/password.",
+        )
+    if any(
+        marker in text
+        for marker in (
+            "err_proxy_connection_failed",
+            "err_tunnel_connection_failed",
+            "err_proxy_certificate",
+            "err_socks",
+        )
+    ):
+        return (
+            "proxy_error",
+            "Tidak bisa terhubung ke proxy. Periksa host/port dan status "
+            "SCRIBD_PROXY.",
+        )
     if any(
         marker in text
         for marker in (
