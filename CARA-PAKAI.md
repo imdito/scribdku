@@ -10,6 +10,13 @@ tanpa server publik.
   mengunduh Chrome sendiri saat job pertama)
 
 ## Jalan
+Mode jendela sendiri (disarankan) — app kebuka di jendelanya sendiri,
+tanpa address bar/tab browser:
+- Linux/macOS: `./run-window.sh`
+- Windows: klik dua kali `run-window.bat`
+- Menutup jendela app ikut mematikan server yang dinyalakannya.
+
+Mode browser biasa (server jalan terus di terminal):
 - Linux/macOS: `./run.sh`
 - Windows: klik dua kali `run.bat`
 

@@ -12,10 +12,10 @@ cat > "$APPS_DIR/scribdku.desktop" << DESKTOP
 Type=Application
 Name=Scribdku
 Comment=Pengunduh dokumen Scribd (lokal)
-Exec=bash "$APP_DIR/run.sh"
+Exec=bash "$APP_DIR/run-window.sh"
 Path=$APP_DIR
 Icon=scribdku
-Terminal=true
+Terminal=false
 Categories=Network;Utility;
 Keywords=scribd;download;unduh;pdf;dokumen;
 StartupNotify=true
