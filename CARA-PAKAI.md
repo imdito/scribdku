@@ -51,3 +51,9 @@ sebentar). Setelah itu browser otomatis membuka http://localhost:8080
 ## Alternatif (Docker)
 `Dockerfile` dan `docker-compose.yml` tetap tersedia kalau suatu saat ingin
 jalan via container: `docker compose up -d --build`.
+
+## Kredit
+Backend pengunduh memakai script dari repo themrsami/scribd-downloader
+(https://github.com/themrsami/scribd-downloader, lisensi MIT) sebagai
+git submodule. Server, UI, dan kemasan lokal di repo ini adalah tambahan
+di atasnya.
