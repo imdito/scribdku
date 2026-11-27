@@ -13,6 +13,14 @@ tanpa server publik.
 - Linux/macOS: `./run.sh`
 - Windows: klik dua kali `run.bat`
 
+## Biar muncul di pencarian aplikasi
+- Linux: jalankan `./install-linux.sh` — Scribdku muncul di pencarian
+  aplikasi (GNOME/COSMIC/dll). Lepas lagi dengan `./uninstall-linux.sh`.
+- Windows: jalankan `install-windows.bat` — Scribdku muncul di pencarian
+  Start Menu. Lepas lagi dengan `uninstall-windows.bat`.
+- Setelah terpasang, folder app jangan dipindah (shortcut menunjuk ke folder
+  ini). Kalau pindah, jalankan script install-nya lagi.
+
 Pertama kali, script menyiapkan `.venv` dan memasang dependency (butuh internet
 sebentar). Setelah itu browser otomatis membuka http://localhost:8080
 (port bisa diganti lewat env `SCRIBD_PORT`).
